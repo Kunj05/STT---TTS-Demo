@@ -1,0 +1,6 @@
+sarvamai
+requests
+python-dotenv
+fastapi
+uvicorn
+websockets

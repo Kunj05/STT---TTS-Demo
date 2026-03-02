@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Spectacles TTS Test</title>
+</head>
+<body>
+
+<h2>🔊 Auto TTS Demo</h2>
+<p>Playing long mixed Hindi + Marathi + English text automatically...</p>
+
+<script>
+let ws = new WebSocket("ws://localhost:8000/tts");
+
+ws.onopen = function() {
+
+    let longText = `
+    नमस्ते, mala khup anand zala tumhala bhetun.
+    Aaj aapan ek AI assistant system test kartoy.
+    This system can understand Hindi, Marathi and English together.
+    Tumhi kahi pan vicharu shakta and it will respond instantly.
+    You can do it, we can build amazing smart spectacles using AI technology.
+    हे technology khup powerful aahe and it will change accessibility forever.
+    `;
+
+    ws.send(JSON.stringify({
+        text: longText,
+        language: "hi-IN"
+    }));
+};
+
+ws.onmessage = function(event) {
+    let audioBase64 = event.data;
+    let audio = new Audio("data:audio/wav;base64," + audioBase64);
+    audio.play();
+};
+</script>
+
+</body>
+</html>
