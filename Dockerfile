@@ -20,11 +20,8 @@ CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # ✅ 5️⃣ Build Docker Image
 # docker build -t sarvam-speech .
-# docker build --no-cache -t sarvam-speech . 
+# docker build -t sarvam-speech . 
 
 # ✅ 6️⃣ Run Container
 # docker run --rm  sarvam-speech
 # docker run --rm --env-file .env -p 8000:8000 sarvam-speech
-
-# If you want to mount local files:
-# docker run --rm -v $(pwd):/app sarvam-speech

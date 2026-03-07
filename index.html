@@ -14,12 +14,25 @@ let ws = new WebSocket("ws://localhost:8000/tts");
 ws.onopen = function() {
 
     let longText = `
-    नमस्ते, mala khup anand zala tumhala bhetun.
-    Aaj aapan ek AI assistant system test kartoy.
-    This system can understand Hindi, Marathi and English together.
-    Tumhi kahi pan vicharu shakta and it will respond instantly.
-    You can do it, we can build amazing smart spectacles using AI technology.
-    हे technology khup powerful aahe and it will change accessibility forever.
+    Hindi (हिंदी)
+नमस्ते! आशा है आपका दिन खुशियों और सकारात्मक ऊर्जा से भरा हुआ हो।
+आप हमेशा स्वस्थ, सफल और मुस्कुराते रहें – यही मेरी शुभकामना है।
+
+Marathi (मराठी)
+नमस्कार! तुमचा दिवस आनंद, शांतता आणि सकारात्मक ऊर्जेने भरलेला असो.
+तुम्ही नेहमी निरोगी, यशस्वी आणि हसतमुख राहा हीच माझी शुभेच्छा.
+
+Gujarati (ગુજરાતી)
+નમસ્તે! તમારો દિવસ ખુશી, શાંતિ અને સકારાત્મક ઊર્જાથી ભરેલો રહે.
+તમે હંમેશા સ્વસ્થ, સફળ અને સ્મિત સાથે જીવન જીવો તેવી શુભેચ્છા.
+
+Bengali (বাংলা)
+নমস্কার! আপনার দিনটি সুখ, শান্তি এবং ইতিবাচক শক্তিতে ভরে উঠুক।
+আপনি সবসময় সুস্থ, সফল এবং হাসিখুশি থাকুন — এই কামনা করি।
+
+English
+Hello! I hope your day is filled with happiness, peace, and positive energy.
+May you always stay healthy, successful, and keep smiling in life.
     `;
 
     ws.send(JSON.stringify({
