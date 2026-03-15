@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Run app
-CMD ["uvicorn", "ocr:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "tts:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # ✅ 5️⃣ Build Docker Image
 # docker build -t sarvam-speech .
