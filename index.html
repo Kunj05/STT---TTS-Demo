@@ -1,51 +1,121 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Spectacles TTS Test</title>
+<title>AI Voice Assistant</title>
+<style>
+    body{
+    font-family: Arial;
+    text-align:center;
+    margin-top:60px;
+    }
+
+    button{
+    padding:12px 20px;
+    font-size:18px;
+    margin:10px;
+    cursor:pointer;
+    }
+
+    #text{
+    font-size:20px;
+    margin-top:20px;
+    }
+    #transcriptBox {
+      margin-top: 18px;
+      border: 1px solid #ddd;
+      background:#f9f9f9;
+      border-radius:8px;
+      padding:14px;
+      width:80%;
+      max-width:700px;
+      margin-left:auto;
+      margin-right:auto;
+      text-align:left;
+      color:#333;
+    }
+    #transcriptBox h3 {
+      margin:0 0 8px 0;
+      font-size:18px;
+    }
+    #transcriptText {
+      font-size:20px;
+      word-break: break-word;
+    }
+</style>
 </head>
+
 <body>
 
-<h2>🔊 Auto TTS Demo</h2>
-<p>Playing long mixed Hindi + Marathi + English text automatically...</p>
+<h2>🎤 AI Voice Assistant</h2>
+
+<button onclick="startRecording()">Start Speaking</button>
+<button onclick="stopRecording()">Stop</button>
+
+<div id="transcriptBox">
+  <h3>Transcript</h3>
+  <p id="transcriptText">Transcript will appear here...</p>
+</div>
+
+<audio id="ttsPlayer" controls style="margin-top:20px;"></audio>
 
 <script>
+
+let recorder;
+let audioChunks = [];
+
 let ws = new WebSocket("ws://localhost:8000/tts");
 
-ws.onopen = function() {
+    ws.onmessage = function(event){
+        console.log("TTS audio received");
+        let audioBase64 = event.data;
+        let binary = atob(audioBase64);
+        let bytes = new Uint8Array(binary.length);
 
-    let longText = `
-    Hindi (हिंदी)
-नमस्ते! आशा है आपका दिन खुशियों और सकारात्मक ऊर्जा से भरा हुआ हो।
-आप हमेशा स्वस्थ, सफल और मुस्कुराते रहें – यही मेरी शुभकामना है।
-
-Marathi (मराठी)
-नमस्कार! तुमचा दिवस आनंद, शांतता आणि सकारात्मक ऊर्जेने भरलेला असो.
-तुम्ही नेहमी निरोगी, यशस्वी आणि हसतमुख राहा हीच माझी शुभेच्छा.
-
-Gujarati (ગુજરાતી)
-નમસ્તે! તમારો દિવસ ખુશી, શાંતિ અને સકારાત્મક ઊર્જાથી ભરેલો રહે.
-તમે હંમેશા સ્વસ્થ, સફળ અને સ્મિત સાથે જીવન જીવો તેવી શુભેચ્છા.
-
-Bengali (বাংলা)
-নমস্কার! আপনার দিনটি সুখ, শান্তি এবং ইতিবাচক শক্তিতে ভরে উঠুক।
-আপনি সবসময় সুস্থ, সফল এবং হাসিখুশি থাকুন — এই কামনা করি।
-
-English
-Hello! I hope your day is filled with happiness, peace, and positive energy.
-May you always stay healthy, successful, and keep smiling in life.
-    `;
-
-    ws.send(JSON.stringify({
-        text: longText,
-        language: "hi-IN"
-    }));
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        let blob = new Blob([bytes], { type: "audio/webm" });
+        let audioURL = URL.createObjectURL(blob);
+        let audio = new Audio(audioURL);
+        audio.play().catch(err=>{
+            console.log("Audio play error:",err);
+        });
+        document.getElementById("ttsPlayer").src = audioURL;    
 };
+    
+    async function startRecording(){
+        const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+        recorder = new MediaRecorder(stream);
+        audioChunks = [];
+        recorder.ondataavailable = e => audioChunks.push(e.data);
+        recorder.start();
+        document.getElementById("text").innerText="🎤 Listening...";
+    }
 
-ws.onmessage = function(event) {
-    let audioBase64 = event.data;
-    let audio = new Audio("data:audio/wav;base64," + audioBase64);
-    audio.play();
-};
+    async function stopRecording(){
+        recorder.stop();
+        recorder.onstop = async ()=>{
+            let blob = new Blob(audioChunks,{type:"audio/wav"});
+            let formData = new FormData();
+            formData.append("file",blob,"speech.wav");
+
+            let response = await fetch("http://localhost:8000/stt",{
+            method:"POST",
+            body:formData
+            });
+
+            let data = await response.json();
+
+            let transcriptText = data.transcript || "(No transcript returned)";
+            document.getElementById("transcriptText").innerText = transcriptText;
+
+            ws.send(JSON.stringify({
+                text: transcriptText,
+                language: "en-IN"
+            }));
+        };
+    }
+
 </script>
 
 </body>

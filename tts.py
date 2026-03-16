@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sarvamai import SarvamAI
 from sarvamai.core.api_error import ApiError
 from dotenv import load_dotenv
+from fastapi import UploadFile, File
 
 load_dotenv()
 
@@ -28,26 +29,33 @@ app.add_middleware(
 # 🎤 STT using sample.wav
 # -------------------------
 
-@app.get("/stt")
-def speech_to_text():
+@app.post("/stt")
+async def speech_to_text(file: UploadFile = File(...)):
     try:
-        with open("sample.wav", "rb") as audio_file:
-            response = client.speech_to_text.transcribe(
-                file=audio_file,
-                model="saaras:v3",
-                mode="transcribe",
-                language_code="unknown"
-            )
+        audio_bytes = await file.read()
+
+        response = client.speech_to_text.transcribe(
+            file=audio_bytes,
+            model="saaras:v3",
+            mode="codemix",
+            language_code="unknown"
+        )
+
+        transcript = response.transcript
+
+        # PRINT IN TERMINAL
+        print("\n🎤 STT RESULT:", transcript)
+        print("Language:", response.language_code)
+        print("Confidence:", response.language_probability)
 
         return {
-            "transcript": response.transcript,
+            "transcript": transcript,
             "language": response.language_code,
             "confidence": response.language_probability
         }
 
     except ApiError as e:
         return {"error": str(e.body)}
-
 
 # -------------------------
 # 🔊 TEXT TO SPEECH
@@ -61,7 +69,7 @@ async def text_to_speech(ws: WebSocket):
         data = await ws.receive_json()
 
         text = data.get("text")
-        language = data.get("language", "hi-IN")
+        language = data.get("language", "en-IN")
 
         try:
             response = client.text_to_speech.convert(
