@@ -22,11 +22,6 @@ CMD ["uvicorn", "tts:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # ✅ 5️⃣ Build Docker Image
 # docker build -t sarvam-speech .
-# docker build -t sarvam-speech .
 
 # ✅ 6️⃣ Run Container
-# docker run --rm  sarvam-speech
 # docker run --rm --env-file .env -p 8000:8000 sarvam-speech
-
-
-# docker run -it --rm -v "%cd%:/app" sarvam-speech bash
