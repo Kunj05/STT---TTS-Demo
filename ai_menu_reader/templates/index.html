@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Menu Reader</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      video,
+      canvas {
+        max-width: 100%;
+        border: 1px solid #ccc;
+      }
+      button {
+        margin: 10px 5px;
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+      textarea {
+        width: 100%;
+        height: 100px;
+        margin: 10px 0;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        margin: 10px 0;
+      }
+      #response {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+      }
+      .loading {
+        display: none;
+        color: #007bff;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AI Menu Reader for Visually Impaired Users</h1>
+
+    <div>
+      <button id="startCamera">Start Camera</button>
+      <button id="runDetection" disabled>Run YOLO Detection</button>
+      <button id="captureImage" disabled>Capture Image</button>
+    </div>
+
+    <video id="video" autoplay></video>
+    <canvas id="canvas" style="display: none"></canvas>
+
+    <div>
+      <input type="file" id="uploadInput" accept="image/*" />
+      <button id="uploadButton">Upload Image</button>
+    </div>
+
+    <div>
+      <h3>Extracted Text:</h3>
+      <textarea id="extractedText" readonly></textarea>
+    </div>
+
+    <div>
+  <input type="text" id="questionInput" placeholder="Ask a question about the menu..." />
+<button onclick="startRecording()">🎤 Speak</button>
+<button id="askButton">Ask Question</button>
+    </div>
+
+    <div id="response" style="display: none">
+      <h3>AI Response:</h3>
+   <p id="responseText"></p>
+    <button onclick="playTTS()">🔊 Listen</button>
+    </div>
+
+    <div class="loading" id="loading">Processing...</div>
+
+    <script src="/static/script.js"></script>
+  </body>
+</html>

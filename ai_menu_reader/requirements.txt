@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+paddleocr
+paddlepaddle
+opencv-python
+ultralytics
+google-generativeai
+numpy
+pillow
