@@ -108,6 +108,7 @@ captureImageBtn.addEventListener("click", async () => {
       });
       const data = await response.json();
       extractedText.value = data.text;
+      // speakFeedback("Image captured and text extracted.");
     } catch (err) {
       alert("Error capturing image: " + err.message);
     } finally {
@@ -135,6 +136,7 @@ uploadButton.addEventListener("click", async () => {
     });
     const data = await response.json();
     extractedText.value = data.text;
+    // speakFeedback("Image uploaded successfully. Text extracted.");
   } catch (err) {
     alert("Error uploading image: " + err.message);
   } finally {
@@ -176,62 +178,137 @@ let recorder;
 let audioChunks = [];
 
 async function startRecording() {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-    recorder = new MediaRecorder(stream);
-    audioChunks = [];
+  recorder = new MediaRecorder(stream);
+  audioChunks = [];
 
-    recorder.ondataavailable = e => audioChunks.push(e.data);
+  recorder.ondataavailable = (e) => audioChunks.push(e.data);
 
-    recorder.start();
+  recorder.start();
 
-    setTimeout(() => stopRecording(), 4000); // auto stop after 4 sec
+  setTimeout(() => stopRecording(), 4000); // auto stop after 4 sec
 }
 
 async function stopRecording() {
-    recorder.stop();
+  recorder.stop();
 
-    recorder.onstop = async () => {
-        let blob = new Blob(audioChunks, { type: "audio/wav" });
+  recorder.onstop = async () => {
+    let blob = new Blob(audioChunks, { type: "audio/wav" });
 
-        let formData = new FormData();
-        formData.append("file", blob, "speech.wav");
+    let formData = new FormData();
+    formData.append("file", blob, "speech.wav");
 
-        let response = await fetch("/stt", {
-            method: "POST",
-            body: formData
-        });
+    let response = await fetch("/stt", {
+      method: "POST",
+      body: formData,
+    });
 
-        let data = await response.json();
+    let data = await response.json();
 
-        document.getElementById("questionInput").value = data.transcript;
-    };
+    document.getElementById("questionInput").value = data.transcript;
+  };
 }
 
 let ws = new WebSocket("ws://localhost:8000/tts");
 
-ws.onmessage = function(event) {
-    let audioBase64 = event.data;
+ws.onmessage = function (event) {
+  let audioBase64 = event.data;
 
-    let binary = atob(audioBase64);
-    let bytes = new Uint8Array(binary.length);
+  let binary = atob(audioBase64);
+  let bytes = new Uint8Array(binary.length);
 
-    for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-    }
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
 
-    let blob = new Blob([bytes], { type: "audio/webm" });
-    let url = URL.createObjectURL(blob);
+  let blob = new Blob([bytes], { type: "audio/webm" });
+  let url = URL.createObjectURL(blob);
 
-    let audio = new Audio(url);
-    audio.play();
+  let audio = new Audio(url);
+  audio.play();
 };
 
 function playTTS() {
-    let text = document.getElementById("responseText").innerText;
+  let text = document.getElementById("responseText").innerText;
 
-    ws.send(JSON.stringify({
-        text: text,
-        language: "en-IN"
-    }));
+  ws.send(
+    JSON.stringify({
+      text: text,
+      language: "en-IN",
+    }),
+  );
 }
+
+
+
+
+
+
+
+
+
+
+// function speakFeedback(message){
+
+//     document.getElementById("status").innerText = message;
+
+//     let toast = document.getElementById("toast");
+//     toast.innerText = message;
+//     toast.style.display = "block";
+
+//     setTimeout(()=>toast.style.display="none",3000);
+
+//     ws.send(JSON.stringify({
+//         text: message,
+//         language: "en-IN"
+//     }));
+// }
+
+// // Wake word detection
+// let recognition;
+
+// function startWakeWordListening() {
+//   const SpeechRecognition =
+//     window.SpeechRecognition || window.webkitSpeechRecognition;
+
+//   if (!SpeechRecognition) {
+//     console.log("SpeechRecognition not supported");
+//     return;
+//   }
+
+//   recognition = new SpeechRecognition();
+
+//   recognition.continuous = true;
+//   recognition.interimResults = false;
+//   recognition.lang = "en-IN";
+
+//   recognition.onresult = function (event) {
+//     let transcript =
+//       event.results[event.results.length - 1][0].transcript.toLowerCase();
+
+//     console.log("Heard:", transcript);
+
+//     // 🔥 WAKE WORD
+//     if (
+//       transcript.includes("hey Alexa") ||
+//       transcript.includes("ok spectacles") ||
+//       transcript.includes("Alexa")||
+//       transcript.includes("hi Alexa")||
+//       transcript.includes("he Alexa")
+//     ) {
+//       console.log("Wake word detected");
+
+//       // start your existing recording
+//       startRecording();
+//     }
+//   };
+
+//   recognition.onerror = (e) => console.log("Wake word error:", e);
+
+//   recognition.start();
+// }
+
+// window.onload = () => {
+//   startWakeWordListening();
+// };

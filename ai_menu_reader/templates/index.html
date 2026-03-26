@@ -1,95 +1,138 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Menu Reader</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-      }
-      video,
-      canvas {
-        max-width: 100%;
-        border: 1px solid #ccc;
-      }
-      button {
-        margin: 10px 5px;
-        padding: 10px 15px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      button:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-      }
-      textarea {
-        width: 100%;
-        height: 100px;
-        margin: 10px 0;
-      }
-      input[type="text"] {
-        width: 100%;
-        padding: 8px;
-        margin: 10px 0;
-      }
-      #response {
-        background-color: #f8f9fa;
-        padding: 10px;
-        border-radius: 4px;
-        margin-top: 10px;
-      }
-      .loading {
-        display: none;
-        color: #007bff;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>AI Menu Reader for Visually Impaired Users</h1>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Menu Reader</title>
 
-    <div>
-      <button id="startCamera">Start Camera</button>
-      <button id="runDetection" disabled>Run YOLO Detection</button>
-      <button id="captureImage" disabled>Capture Image</button>
-    </div>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f4f6f9;
+  }
 
-    <video id="video" autoplay></video>
-    <canvas id="canvas" style="display: none"></canvas>
+  h1 {
+    text-align: center;
+    color: #333;
+  }
 
-    <div>
-      <input type="file" id="uploadInput" accept="image/*" />
-      <button id="uploadButton">Upload Image</button>
-    </div>
+  .card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
 
-    <div>
-      <h3>Extracted Text:</h3>
-      <textarea id="extractedText" readonly></textarea>
-    </div>
+  video, canvas {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
 
-    <div>
-  <input type="text" id="questionInput" placeholder="Ask a question about the menu..." />
-<button onclick="startRecording()">🎤 Speak</button>
-<button id="askButton">Ask Question</button>
-    </div>
+  button {
+    margin: 8px 5px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
 
-    <div id="response" style="display: none">
-      <h3>AI Response:</h3>
-   <p id="responseText"></p>
-    <button onclick="playTTS()">🔊 Listen</button>
-    </div>
+  textarea {
+    width: 100%;
+    height: 100px;
+    margin-top: 10px;
+    border-radius: 6px;
+    padding: 8px;
+  }
 
-    <div class="loading" id="loading">Processing...</div>
+  #response {
+    background: #eaf3ff;
+    padding: 10px;
+    border-radius: 6px;
+  }
 
-    <script src="/static/script.js"></script>
-  </body>
+  .loading {
+    display: none;
+    text-align: center;
+    color: #007bff;
+    font-weight: bold;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>👓 AI Menu Reader</h1>
+
+<!-- ================= CAMERA SECTION ================= -->
+<div class="card">
+  <button id="startCamera">Start Camera</button>
+  <button id="runDetection" disabled>Run YOLO Detection</button>
+  <button id="captureImage" disabled>Capture Image</button>
+
+  <video id="video" autoplay></video>
+  <canvas id="canvas" style="display: none"></canvas>
+</div>
+
+<!-- ================= UPLOAD SECTION ================= -->
+<div class="card">
+  <input type="file" id="uploadInput" accept="image/*" />
+  <button id="uploadButton">Upload Image</button>
+</div>
+
+<!-- ================= OCR TEXT ================= -->
+<div class="card">
+  <h3>📄 Extracted Text</h3>
+  <textarea id="extractedText" readonly></textarea>
+</div>
+
+<!-- ================= OLD VOICE SYSTEM (ACTIVE NOW) ================= -->
+<!--
+Manual interaction:
+User types or speaks → clicks Ask → gets response
+-->
+<div class="card">
+  <input
+    type="text"
+    id="questionInput"
+    placeholder="Ask a question about the menu..."
+  />
+  <button onclick="startRecording()">🎤 Speak</button>
+  <button id="askButton">Ask Question</button>
+</div>
+
+<!-- ================= NEW VOICE SYSTEM (COMMENTED) ================= -->
+<!--
+This was the advanced system:
+- Wake word detection (Hey Spectacles)
+- Auto recording
+- No buttons required
+
+Keeping it commented for explanation/demo
+
+<input type="hidden" id="questionInput" />
+<button id="askButton" style="display:none;"></button>
+
+<p id="status">🎧 Listening for "Hey Spectacles..."</p>
+-->
+
+<!-- ================= RESPONSE ================= -->
+<div id="response" class="card" style="display:none">
+  <h3>🤖 AI Response</h3>
+  <p id="responseText"></p>
+  <button onclick="playTTS()">🔊 Listen</button>
+</div>
+
+<!-- ================= LOADING ================= -->
+<div class="loading" id="loading">⏳ Processing...</div>
+
+<script src="/static/script.js"></script>
+
+</body>
 </html>
